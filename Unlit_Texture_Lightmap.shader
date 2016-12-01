@@ -107,7 +107,7 @@ SubShader {
 		};
 
 		sampler2D _MainTex;
-		float4 _MainTex_ST;
+		half4 _MainTex_ST;
 
 		half _Brightness;
 		half _Contrast;
@@ -145,7 +145,6 @@ SubShader {
 
 		}
 
-
 		Pass{
 			Tags{ "LightMode" = "Vertex" }
 
@@ -163,7 +162,7 @@ SubShader {
 		struct appdata
 		{
 			float4 vertex : POSITION;
-			float2 texcoord : TEXCOORD0; // Consider making half2 for speed
+			float2 texcoord : TEXCOORD0;
 		};
 
 		struct v2f

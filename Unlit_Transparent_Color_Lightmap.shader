@@ -18,6 +18,8 @@ SubShader {
 		CGPROGRAM
 #pragma vertex vert
 #pragma fragment frag
+		// Make fog work
+#pragma multi_compile_fog
 
 #include "UnityCG.cginc"
 
@@ -33,6 +35,7 @@ SubShader {
 		float4 vertex : SV_POSITION;
 		float2 uv_lightmap : TEXCOORD0;
 		float2 uv_main : TEXCOORD1;
+		UNITY_FOG_COORDS(2)
 	};
 
 	sampler2D _MainTex;
@@ -45,6 +48,7 @@ SubShader {
 		o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
 		o.uv_main = TRANSFORM_TEX(i.texcoord, _MainTex);
 		o.uv_lightmap = i.texcoord1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+		UNITY_TRANSFER_FOG(o, o.vertex);
 		return o;
 	}
 
@@ -53,6 +57,8 @@ SubShader {
 		half4 main_color = tex2D(_MainTex, i.uv_main);
 
 		main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap)) * _Color;
+		// Apply fog
+		UNITY_APPLY_FOG(i.fogCoord, main_color);
 		return main_color;
 	}
 
@@ -66,6 +72,8 @@ SubShader {
 		CGPROGRAM
 #pragma vertex vert
 #pragma fragment frag
+		// Make fog work
+#pragma multi_compile_fog
 
 #include "UnityCG.cginc"
 
@@ -81,6 +89,7 @@ SubShader {
 		float4 vertex : SV_POSITION;
 		float2 uv_lightmap : TEXCOORD0;
 		float2 uv_main : TEXCOORD1;
+		UNITY_FOG_COORDS(2)
 	};
 
 	sampler2D _MainTex;
@@ -93,6 +102,7 @@ SubShader {
 		o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
 		o.uv_main = TRANSFORM_TEX(i.texcoord, _MainTex);
 		o.uv_lightmap = i.texcoord1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+		UNITY_TRANSFER_FOG(o, o.vertex);
 		return o;
 	}
 
@@ -101,6 +111,8 @@ SubShader {
 		half4 main_color = tex2D(_MainTex, i.uv_main);
 
 		main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap)) * _Color;
+		// Apply fog
+		UNITY_APPLY_FOG(i.fogCoord, main_color);
 		return main_color;
 	}
 
@@ -114,6 +126,8 @@ SubShader {
 		CGPROGRAM
 #pragma vertex vert
 #pragma fragment frag
+		// Make fog work
+#pragma multi_compile_fog
 
 #include "UnityCG.cginc"
 
@@ -126,7 +140,8 @@ SubShader {
 	struct v2f
 	{
 		float4 vertex : SV_POSITION;
-		float2 uv_main : TEXCOORD1;
+		float2 uv_main : TEXCOORD0;
+		UNITY_FOG_COORDS(1)
 	};
 
 	sampler2D _MainTex;
@@ -138,6 +153,7 @@ SubShader {
 		v2f o;
 		o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
 		o.uv_main = TRANSFORM_TEX(i.texcoord, _MainTex);
+		UNITY_TRANSFER_FOG(o, o.vertex);
 		return o;
 	}
 
@@ -145,6 +161,8 @@ SubShader {
 	{
 		half4 main_color = tex2D(_MainTex, i.uv_main);
 		main_color.rgb *= _Color;
+		// Apply fog
+		UNITY_APPLY_FOG(i.fogCoord, main_color);
 		return main_color;
 	}
 

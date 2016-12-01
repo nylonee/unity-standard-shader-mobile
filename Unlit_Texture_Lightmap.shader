@@ -60,11 +60,8 @@ SubShader {
 
 			// Begin post effects (if slow, then do your brightness-contrast modifications elsewhere and comment out these lines)
 			main_color.rgb /= main_color.a;
-			// Apply contrast
 			main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
-			// Apply brightness
 			main_color.rgb += _Brightness;
-			// Return final pixel color
 			main_color.rgb *= main_color.a * _Color;
 
 			return main_color;
@@ -123,11 +120,8 @@ SubShader {
 
 			// Begin post effects (if slow, then do your brightness-contrast modifications elsewhere and comment out these lines)
 			main_color.rgb /= main_color.a;
-			// Apply contrast
 			main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
-			// Apply brightness
 			main_color.rgb += _Brightness;
-			// Return final pixel color
 			main_color.rgb *= main_color.a * _Color;
 
 			return main_color;
@@ -153,8 +147,7 @@ SubShader {
 		struct appdata
 		{
 			float4 vertex : POSITION;
-			float2 texcoord : TEXCOORD0;
-			float2 texcoord1 : TEXCOORD1;
+			float2 texcoord : TEXCOORD0; // Consider making half2 for speed
 		};
 
 		struct v2f
@@ -184,11 +177,8 @@ SubShader {
 
 			// Begin post effects (if slow, then do your brightness-contrast modifications elsewhere and comment out these lines)
 			main_color.rgb /= main_color.a;
-			// Apply contrast
 			main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
-			// Apply brightness
 			main_color.rgb += _Brightness;
-			// Return final pixel color
 			main_color.rgb *= main_color.a * _Color;
 
 			return main_color;

@@ -12,6 +12,7 @@ SubShader {
 	Blend SrcAlpha OneMinusSrcAlpha
 
 	Pass {
+		Tags{ "LightMode" = "VertexLM" }
 		Lighting Off
 
 		CGPROGRAM
@@ -52,6 +53,98 @@ SubShader {
 		half4 main_color = tex2D(_MainTex, i.uv_main);
 
 		main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap)) * _Color;
+		return main_color;
+	}
+
+		ENDCG
+	}
+
+		Pass{
+		Tags{ "LightMode" = "VertexLMRGBM" }
+		Lighting Off
+
+		CGPROGRAM
+#pragma vertex vert
+#pragma fragment frag
+
+#include "UnityCG.cginc"
+
+	struct appdata
+	{
+		float4 vertex : POSITION;
+		float2 texcoord : TEXCOORD0;
+		float2 texcoord1 : TEXCOORD1;
+	};
+
+	struct v2f
+	{
+		float4 vertex : SV_POSITION;
+		float2 uv_lightmap : TEXCOORD0;
+		float2 uv_main : TEXCOORD1;
+	};
+
+	sampler2D _MainTex;
+	float4 _MainTex_ST;
+	float4 _Color;
+
+	v2f vert(appdata i)
+	{
+		v2f o;
+		o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
+		o.uv_main = TRANSFORM_TEX(i.texcoord, _MainTex);
+		o.uv_lightmap = i.texcoord1.xy * unity_LightmapST.xy + unity_LightmapST.zw;
+		return o;
+	}
+
+	fixed4 frag(v2f i) : SV_Target
+	{
+		half4 main_color = tex2D(_MainTex, i.uv_main);
+
+		main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap)) * _Color;
+		return main_color;
+	}
+
+		ENDCG
+	}
+
+		Pass{
+		Tags{ "LightMode" = "Vertex" }
+		Lighting Off
+
+		CGPROGRAM
+#pragma vertex vert
+#pragma fragment frag
+
+#include "UnityCG.cginc"
+
+	struct appdata
+	{
+		float4 vertex : POSITION;
+		float2 texcoord : TEXCOORD0;
+	};
+
+	struct v2f
+	{
+		float4 vertex : SV_POSITION;
+		float2 uv_main : TEXCOORD1;
+	};
+
+	sampler2D _MainTex;
+	float4 _MainTex_ST;
+	float4 _Color;
+
+	v2f vert(appdata i)
+	{
+		v2f o;
+		o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
+		o.uv_main = TRANSFORM_TEX(i.texcoord, _MainTex);
+		return o;
+	}
+
+	fixed4 frag(v2f i) : SV_Target
+	{
+		half4 main_color = tex2D(_MainTex, i.uv_main);
+		main_color.rgb *= _Color;
 		return main_color;
 	}
 

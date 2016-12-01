@@ -4,8 +4,9 @@ Properties {
 	_Brightness ("Brightness", Float) = 0.1
 	_Contrast ("Contrast", Float) = 1
 	_Color ("Color", Color) = (1,1,1,1)
-	_AlternateTex("Secondary Texture (for ambience, emission, etc)", 2D) = "white" {}
-	_AlternateStrength("Strength of secondary texture", Float) = 0
+	//_AlternateTex("Secondary Texture (for ambience, emission, etc)", 2D) = "white" {}
+	//_AlternateStrength("Strength of secondary texture", Float) = 0
+	// Add:  +_AlternateStrength * tex2D(_AlternateTex, i.uv_main)
 }
 
 SubShader {
@@ -44,9 +45,6 @@ SubShader {
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
 
-		sampler2D _AlternateTex;
-		half _AlternateStrength;
-
 		half _Brightness;
 		half _Contrast;
 		half4 _Color;
@@ -63,7 +61,7 @@ SubShader {
 
 		fixed4 frag (v2f i) : SV_Target
 		{
-			half4 main_color = tex2D(_MainTex, i.uv_main) + _AlternateStrength * tex2D(_AlternateTex, i.uv_main);
+			half4 main_color = tex2D(_MainTex, i.uv_main);
 
 			main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap));
 
@@ -114,9 +112,6 @@ SubShader {
 		sampler2D _MainTex;
 		half4 _MainTex_ST;
 
-		sampler2D _AlternateTex;
-		half _AlternateStrength;
-
 		half _Brightness;
 		half _Contrast;
 		half4 _Color;
@@ -133,7 +128,7 @@ SubShader {
 
 		fixed4 frag(v2f i) : SV_Target
 		{
-			half4 main_color = tex2D(_MainTex, i.uv_main) + _AlternateStrength * tex2D(_AlternateTex, i.uv_main);
+			half4 main_color = tex2D(_MainTex, i.uv_main);
 
 			main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap));
 
@@ -183,9 +178,6 @@ SubShader {
 		sampler2D _MainTex;
 		float4 _MainTex_ST;
 
-		sampler2D _AlternateTex;
-		half _AlternateStrength;
-
 		half _Brightness;
 		half _Contrast;
 		half4 _Color;
@@ -201,7 +193,7 @@ SubShader {
 
 		fixed4 frag(v2f i) : SV_Target
 		{
-			half4 main_color = tex2D(_MainTex, i.uv_main) + _AlternateStrength * tex2D(_AlternateTex, i.uv_main);
+			half4 main_color = tex2D(_MainTex, i.uv_main);
 
 			// Begin post effects (if slow, then do your brightness-contrast modifications elsewhere and comment out these lines)
 			main_color.rgb /= main_color.a;

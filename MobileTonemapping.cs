@@ -1,4 +1,4 @@
-﻿// Adapted from ImageEffects/Tonemapping, simplified to User Curve for mobile
+﻿// Adapted from ImageEffects/Tonemapping, simplified to only User Curve for mobile
 using System;
 using UnityEngine;
 
@@ -6,7 +6,7 @@ namespace UnityStandardAssets.ImageEffects
 {
     [ExecuteInEditMode]
     [RequireComponent(typeof(Camera))]
-    [AddComponentMenu("Image Effects/Custom/Tonemapping")]
+    [AddComponentMenu("Image Effects/Custom/MobileTonemapping")]
     public class MobileTonemapping : PostEffectsBase
     {
 
@@ -105,7 +105,7 @@ namespace UnityStandardAssets.ImageEffects
 
             // clamp some values to not go out of a valid range
             
-            float rangeScale = UpdateCurve();
+            float rangeScale = UpdateCurve(); // Gets mapped into a half in shader
             tonemapMaterial.SetFloat("_RangeScale", rangeScale);
             tonemapMaterial.SetTexture("_Curve", curveTex);
             Graphics.Blit(source, destination, tonemapMaterial);

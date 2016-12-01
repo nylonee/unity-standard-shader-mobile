@@ -1,4 +1,5 @@
 ﻿// Adapted from ImageEffects/Tonemapping, simplified to only User Curve for mobile
+// TODO: Add in bloom into script
 using System;
 using UnityEngine;
 

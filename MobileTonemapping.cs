@@ -1,5 +1,4 @@
 ﻿// Adapted from ImageEffects/Tonemapping, simplified to only User Curve for mobile
-// TODO: Add in bloom into script
 using System;
 using UnityEngine;
 
@@ -105,7 +104,7 @@ namespace UnityStandardAssets.ImageEffects
             }
 
             // clamp some values to not go out of a valid range
-            
+
             float rangeScale = UpdateCurve(); // Gets mapped into a half in shader
             tonemapMaterial.SetFloat("_RangeScale", rangeScale);
             tonemapMaterial.SetTexture("_Curve", curveTex);

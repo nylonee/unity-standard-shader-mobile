@@ -3,7 +3,7 @@ Shader "Custom/Unlit Texture (Supports Lightmap)" {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_Brightness ("Brightness", Float) = 0.1
 		_Contrast ("Contrast", Float) = 1
-		_Color ("Color", Color) = (1,1,1,1)
+		_Color ("Color", Color) = (1,1,1,0)
 	}
 
 	CGINCLUDE
@@ -11,9 +11,6 @@ Shader "Custom/Unlit Texture (Supports Lightmap)" {
 	#include "UnityCG.cginc"
 
 	#pragma multi_compile_fog
-
-	// Define to modify texture and apply brightness, contrast and color
-	#define TEXMOD color_overlay(brightness_contrast(tex2D(_MainTex, i.uv_main)))
 
 	struct appdata
 	{
@@ -44,15 +41,6 @@ Shader "Custom/Unlit Texture (Supports Lightmap)" {
 	half _Contrast;
 	half4 _Color;
 
-	v2f vert(appdata i)
-	{
-		v2f o;
-		o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
-		o.uv_main = TRANSFORM_TEX(i.texcoord, _MainTex);
-		UNITY_TRANSFER_FOG(o, o.vertex);
-		return o;
-	}
-
 	half4 brightness_contrast(half4 main_color)
 	{
 		// Brightness and contrast. Uses _Contrast and _Brightness
@@ -63,19 +51,13 @@ Shader "Custom/Unlit Texture (Supports Lightmap)" {
 		return main_color;
 	}
 
-	half4 color_overlay(half4 main_color)
+	v2f vert(appdata i)
 	{
-		// Painter's algorithm for color overlay, uses _Color
-		main_color.rgb = ((main_color.rgb * main_color.a) + (_Color.rgb * _Color.a) * (1 - main_color.a)) / (main_color.a + _Color.a * (1 - main_color.a));
-		return main_color;
-	}
-
-	fixed4 frag(v2f i) : SV_Target
-	{
-		half4 main_color = TEXMOD;
-		// Apply fog
-		UNITY_APPLY_FOG(i.fogCoord, main_color);
-		return main_color;
+		v2f o;
+		o.vertex = mul(UNITY_MATRIX_MVP, i.vertex);
+		o.uv_main = TRANSFORM_TEX(i.texcoord, _MainTex);
+		UNITY_TRANSFER_FOG(o, o.vertex);
+		return o;
 	}
 
 	v2f_lm vert_lm(appdata i)
@@ -88,9 +70,22 @@ Shader "Custom/Unlit Texture (Supports Lightmap)" {
 		return o;
 	}
 
+	fixed4 frag(v2f i) : SV_Target
+	{
+		half4 main_color = brightness_contrast(tex2D(_MainTex, i.uv_main));
+		// Apply color tint
+		main_color.rgb = lerp(main_color.rgb, _Color.rgb, _Color.a);
+		// Apply fog
+		UNITY_APPLY_FOG(i.fogCoord, main_color);
+		return main_color;
+	}
+
 	fixed4 frag_lm (v2f_lm i) : SV_Target
 	{
-		half4 main_color = TEXMOD;
+		half4 main_color = brightness_contrast(tex2D(_MainTex, i.uv_main));
+		// Apply color tint
+		main_color.rgb = lerp(main_color.rgb, _Color.rgb, _Color.a);
+		// Apply lightmap
 		main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap));
 		// Apply fog
 		UNITY_APPLY_FOG(i.fogCoord, main_color);

@@ -1,8 +1,8 @@
 Shader "Custom/Unlit Texture (Supports Lightmap)" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
-		_Brightness ("Brightness", Float) = 0.1
-		_Contrast ("Contrast", Float) = 1
+		_Brightness ("Brightness", Range(-10.0, 10.0)) = 0.0
+		_Contrast ("Contrast", Range(0.0, 3.0)) = 1
 		_Color ("Color", Color) = (1,1,1,0)
 	}
 
@@ -46,7 +46,7 @@ Shader "Custom/Unlit Texture (Supports Lightmap)" {
 		// Brightness and contrast. Uses _Contrast and _Brightness
 		main_color.rgb /= main_color.a;
 		main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
-		main_color.rgb += _Brightness;
+		main_color.rgb += _Brightness * 0.05;
 		main_color.rgb *= main_color.a;
 		return main_color;
 	}

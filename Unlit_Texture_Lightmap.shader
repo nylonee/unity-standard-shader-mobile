@@ -110,7 +110,7 @@ Shader "Custom/Unlit Texture (Supports Lightmap)" {
 		}
 
 		Pass {
-			Tags{ "LightMode" = "VertexLMRGBM" }
+			Tags { "LightMode" = "VertexLMRGBM" }
 			// Disable lighting, we're only using the lightmap
 			Lighting Off
 
@@ -120,8 +120,8 @@ Shader "Custom/Unlit Texture (Supports Lightmap)" {
 			ENDCG
 		}
 
-		Pass{
-			Tags{ "LightMode" = "Vertex" }
+		Pass {
+			Tags { "LightMode" = "Vertex" }
 			// Disable lighting
 			Lighting Off
 

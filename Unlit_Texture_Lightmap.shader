@@ -65,11 +65,14 @@ SubShader {
 
 			main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap));
 
-			// Begin post effects (if slow, then do your brightness-contrast modifications elsewhere and comment out these lines)
+			// Brightness and contrast. If slow, comment out these lines
 			main_color.rgb /= main_color.a;
 			main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
 			main_color.rgb += _Brightness;
-			main_color.rgb *= main_color.a * _Color;
+			main_color.rgb *= main_color.a;
+
+			// Painter's algorithm for color overlay. If slow, comment this out
+			main_color.rgb = ((main_color.rgb * main_color.a) + (_Color.rgb * _Color.a) * (1 - main_color.a)) / (main_color.a + _Color.a * (1 - main_color.a));
 
 			// Apply fog
 			UNITY_APPLY_FOG(i.fogCoord, main_color);
@@ -132,11 +135,14 @@ SubShader {
 
 			main_color.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lightmap));
 
-			// Begin post effects (if slow, then do your brightness-contrast modifications elsewhere and comment out these lines)
+			// Brightness and contrast. If slow, comment out these lines
 			main_color.rgb /= main_color.a;
 			main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
 			main_color.rgb += _Brightness;
-			main_color.rgb *= main_color.a * _Color;
+			main_color.rgb *= main_color.a;
+
+			// Painter's algorithm for color overlay. If slow, comment this out
+			main_color.rgb = ((main_color.rgb * main_color.a) + (_Color.rgb * _Color.a) * (1 - main_color.a)) / (main_color.a + _Color.a * (1 - main_color.a));
 
 			// Apply fog
 			UNITY_APPLY_FOG(i.fogCoord, main_color);
@@ -195,11 +201,14 @@ SubShader {
 		{
 			half4 main_color = tex2D(_MainTex, i.uv_main);
 
-			// Begin post effects (if slow, then do your brightness-contrast modifications elsewhere and comment out these lines)
+			// Brightness and contrast. If slow, comment out these lines
 			main_color.rgb /= main_color.a;
 			main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
 			main_color.rgb += _Brightness;
-			main_color.rgb *= main_color.a * _Color;
+			main_color.rgb *= main_color.a;
+
+			// Painter's algorithm for color overlay. If slow, comment this out
+			main_color.rgb = ((main_color.rgb * main_color.a) + (_Color.rgb * _Color.a) * (1 - main_color.a)) / (main_color.a + _Color.a * (1 - main_color.a));
 
 			// Apply fog
 			UNITY_APPLY_FOG(i.fogCoord, main_color);

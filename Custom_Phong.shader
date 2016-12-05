@@ -130,7 +130,7 @@ Shader "Custom/MobilePhong" {
 
   fixed4 frag(v2f v) : SV_Target
   {
-    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main));
+    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main) + tex2D(_EmissionMap, v.uv_main)*(_EmissionStrength/5));
 
     // Our interpolated normal might not be of length 1
     float3 interpNormal = normalize(v.worldNormal);
@@ -165,10 +165,10 @@ Shader "Custom/MobilePhong" {
 
   fixed4 frag_lm(v2f_lm v) : SV_Target
   {
+    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main) + tex2D(_EmissionMap, v.uv_main)*(_EmissionStrength/5));
+
     // Our interpolated normal might not be of length 1
     float3 interpNormal = normalize(v.worldNormal);
-
-    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main) + tex2D(_EmissionMap, v.uv_main)*(_EmissionStrength/5));
 
     // Calculate ambient RGB intensities
     float Ka = _AmbiencePower;

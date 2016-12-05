@@ -5,11 +5,14 @@ Shader "Custom/MobilePhong" {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
 		_Brightness ("Brightness", Range(-10.0, 10.0)) = 0.0
 		_Contrast ("Contrast", Range(0.0, 3.0)) = 1
+    _Color("Color tint", Color) = (0, 0, 0, 0)
     _PointLightColor("Point Light Color", Color) = (0, 0, 0, 0)
     _PointLightPosition("Point Light Position", Vector) = (0.0, 0.0, 0.0)
     _AmbiencePower("Ambience intensity", Range(0.0, 2.0)) = 1.0
     _SpecularPower("Specular intensity", Range(0.0, 2.0)) = 1.0
     _DiffusePower("Diffuse intensity", Range(0.0, 2.0)) = 1.0
+    _EmissionMap ("Emission", 2D) = "white" {}
+    _EmissionStrength ("Emission Strength", Range(0.0, 10.0)) = 1
 	}
 
   CGINCLUDE
@@ -28,6 +31,10 @@ Shader "Custom/MobilePhong" {
 
   float _Brightness;
   float _Contrast;
+  float4 _Color;
+
+  sampler2D _EmissionMap;
+  float _EmissionStrength;
 
   float4 brightness_contrast(float4 main_color)
   {
@@ -123,41 +130,34 @@ Shader "Custom/MobilePhong" {
 
   fixed4 frag(v2f v) : SV_Target
   {
+    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main));
+
     // Our interpolated normal might not be of length 1
     float3 interpNormal = normalize(v.worldNormal);
 
-    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main));
-
     // Calculate ambient RGB intensities
-    float Ka = 1;
-    float3 amb = v.color.rgb * UNITY_LIGHTMODEL_AMBIENT.rgb * Ka;
+    float Ka = _AmbiencePower;
+    float3 amb = v.color.rgb * unity_AmbientSky * Ka;
 
     // Calculate diffuse RGB reflections, we save the results of L.N because we will use it again
     // (when calculating the reflected ray in our specular component)
     float fAtt = 1;
-    float Kd = 1;
+    float Kd = _DiffusePower;
     float3 L = normalize(_PointLightPosition - v.worldVertex.xyz);
     float LdotN = dot(L, interpNormal);
-    float3 dif = fAtt * _PointLightColor.rgb * Kd * v.color.rgb * saturate(LdotN);
+    float3 dif = fAtt * _PointLightColor.rgb * Kd * returnColor.rgb * saturate(LdotN);
 
     // Calculate specular reflections
-    float Ks = 1;
-    float specN = 5; // Values >> 1 give tighter highlights
+    float Ks = _SpecularPower;
+    float specN = 25; // Values >> 1 give tighter highlights
     float3 V = normalize(_WorldSpaceCameraPos - v.worldVertex.xyz);
-
-    // Using classic reflection calculation
-    //float3 R = normalize((2.0 * LdotN * interpNormal) - L);
-    //float3 spe = fAtt * _PointLightColor.rgb * Ks * pow(saturate(dot(V, R)), specN);
-
     // Using Blinn-Phong approximation:
-    specN = 25; // We usually need a higher specular power when using Blinn-Phong
     float3 H = normalize(V+L);
     float3 spe = fAtt * _PointLightColor.rgb * Ks * pow(saturate(dot(interpNormal, H)), specN);
 
     // Combine Phong illumination model components
-    float3 phong = _AmbiencePower*amb.rgb + _DiffusePower*dif.rgb + _SpecularPower*spe.rgb;
-    returnColor.rgb = lerp(returnColor.rgb, phong, _PointLightColor.a);
-
+    returnColor.rgb = lerp(returnColor.rgb, amb.rgb + dif.rgb + spe.rgb, _PointLightColor.a);
+    returnColor.rgb = lerp(returnColor.rgb, _Color.rgb, _Color.a);
     UNITY_APPLY_FOG(v.fogCoord, returnColor);
 
     return returnColor;
@@ -168,40 +168,33 @@ Shader "Custom/MobilePhong" {
     // Our interpolated normal might not be of length 1
     float3 interpNormal = normalize(v.worldNormal);
 
-    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main));
+    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main) + tex2D(_EmissionMap, v.uv_main)*(_EmissionStrength/5));
 
     // Calculate ambient RGB intensities
-    float Ka = 1;
-    float3 amb = v.color.rgb * UNITY_LIGHTMODEL_AMBIENT.rgb * Ka;
+    float Ka = _AmbiencePower;
+    float3 amb = returnColor.rgb * unity_AmbientSky.rgb * Ka;
 
     // Calculate diffuse RGB reflections, we save the results of L.N because we will use it again
     // (when calculating the reflected ray in our specular component)
     float fAtt = 1;
-    float Kd = 1;
+    float Kd = _DiffusePower;
     float3 L = normalize(_PointLightPosition - v.worldVertex.xyz);
     float LdotN = dot(L, interpNormal);
-    float3 dif = fAtt * _PointLightColor.rgb * Kd * v.color.rgb * saturate(LdotN);
+    float3 dif = fAtt * _PointLightColor.rgb * Kd * returnColor.rgb * saturate(LdotN);
 
     // Calculate specular reflections
-    float Ks = 1;
-    float specN = 5; // Values >> 1 give tighter highlights
+    float Ks = _SpecularPower;
+    float specN = 25; // Values >> 1 give tighter highlights
     float3 V = normalize(_WorldSpaceCameraPos - v.worldVertex.xyz);
-
-    // Using classic reflection calculation
-    //float3 R = normalize((2.0 * LdotN * interpNormal) - L);
-    //float3 spe = fAtt * _PointLightColor.rgb * Ks * pow(saturate(dot(V, R)), specN);
-
     // Using Blinn-Phong approximation:
-    specN = 25; // We usually need a higher specular power when using Blinn-Phong
     float3 H = normalize(V+L);
     float3 spe = fAtt * _PointLightColor.rgb * Ks * pow(saturate(dot(interpNormal, H)), specN);
 
     returnColor.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, v.uv_lightmap));
 
     // Combine Phong illumination model components
-    float3 phong = _AmbiencePower*amb.rgb + _DiffusePower*dif.rgb + _SpecularPower*spe.rgb;
-    returnColor.rgb = lerp(returnColor.rgb, phong, _PointLightColor.a);
-
+    returnColor.rgb = lerp(returnColor.rgb, amb.rgb + dif.rgb + spe.rgb, _PointLightColor.a);
+    returnColor.rgb = lerp(returnColor.rgb, _Color.rgb, _Color.a);
     UNITY_APPLY_FOG(v.fogCoord, returnColor);
 
     return returnColor;

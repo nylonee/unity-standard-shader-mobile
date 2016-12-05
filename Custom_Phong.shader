@@ -3,8 +3,13 @@
 Shader "Custom/MobilePhong" {
 	Properties {
 		_MainTex ("Base (RGB)", 2D) = "white" {}
+		_Brightness ("Brightness", Range(-10.0, 10.0)) = 0.0
+		_Contrast ("Contrast", Range(0.0, 3.0)) = 1
     _PointLightColor("Point Light Color", Color) = (0, 0, 0, 0)
     _PointLightPosition("Point Light Position", Vector) = (0.0, 0.0, 0.0)
+    _AmbiencePower("Ambience intensity", Range(0.0, 2.0)) = 1.0
+    _SpecularPower("Specular intensity", Range(0.0, 2.0)) = 1.0
+    _DiffusePower("Diffuse intensity", Range(0.0, 2.0)) = 1.0
 	}
 
   CGINCLUDE
@@ -16,6 +21,23 @@ Shader "Custom/MobilePhong" {
 
   uniform float4 _PointLightColor;
   uniform float3 _PointLightPosition;
+
+  float _AmbiencePower;
+  float _SpecularPower;
+  float _DiffusePower;
+
+  float _Brightness;
+  float _Contrast;
+
+  float4 brightness_contrast(float4 main_color)
+  {
+    // Brightness and contrast. Uses _Contrast and _Brightness
+    main_color.rgb /= main_color.a;
+    main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
+    main_color.rgb += _Brightness * 0.05;
+    main_color.rgb *= main_color.a;
+    return main_color;
+  }
 
   struct appdata
   {
@@ -104,7 +126,7 @@ Shader "Custom/MobilePhong" {
     // Our interpolated normal might not be of length 1
     float3 interpNormal = normalize(v.worldNormal);
 
-    float4 returnColor = tex2D(_MainTex, v.uv_main);
+    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main));
 
     // Calculate ambient RGB intensities
     float Ka = 1;
@@ -133,8 +155,8 @@ Shader "Custom/MobilePhong" {
     float3 spe = fAtt * _PointLightColor.rgb * Ks * pow(saturate(dot(interpNormal, H)), specN);
 
     // Combine Phong illumination model components
-    // XXX: This could be better merged. Lerp?
-    returnColor.rgb *= amb.rgb + dif.rgb + spe.rgb;
+    float3 phong = _AmbiencePower*amb.rgb + _DiffusePower*dif.rgb + _SpecularPower*spe.rgb;
+    returnColor.rgb = lerp(returnColor.rgb, phong, _PointLightColor.a);
 
     UNITY_APPLY_FOG(v.fogCoord, returnColor);
 
@@ -146,7 +168,7 @@ Shader "Custom/MobilePhong" {
     // Our interpolated normal might not be of length 1
     float3 interpNormal = normalize(v.worldNormal);
 
-    float4 returnColor = tex2D(_MainTex, v.uv_main);
+    float4 returnColor = brightness_contrast(tex2D(_MainTex, v.uv_main));
 
     // Calculate ambient RGB intensities
     float Ka = 1;
@@ -177,7 +199,8 @@ Shader "Custom/MobilePhong" {
     returnColor.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, v.uv_lightmap));
 
     // Combine Phong illumination model components
-    returnColor.rgb = lerp(returnColor.rgb, amb.rgb + dif.rgb + spe.rgb, _PointLightColor.a);
+    float3 phong = _AmbiencePower*amb.rgb + _DiffusePower*dif.rgb + _SpecularPower*spe.rgb;
+    returnColor.rgb = lerp(returnColor.rgb, phong, _PointLightColor.a);
 
     UNITY_APPLY_FOG(v.fogCoord, returnColor);
 

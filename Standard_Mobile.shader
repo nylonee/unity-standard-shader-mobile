@@ -8,6 +8,11 @@
 // Doesn't support shadow casting
 // Only supports exponential2 fog (the cheapest)
 // Detail mask will only kick in if detail map is toggled on
+
+// Point light accepts a single point light, which you can modify via script if needed
+// For example, a sun moving across the sky
+// No other lighting (except lightmaps) are accepted, to keep the code blazing fast
+
 // TODO: Normal mapping not working properly
 // TODO: Change defined point light to a single inputted light?
 // TODO: ZWrite, Culling, Forward rendering?

@@ -148,7 +148,7 @@ fixed4 frag(v2f i) : SV_Target
   half4 returnColor = tex2D(_MainTex, i.uv_main);
 
   #if DETAIL_ON
-  half4 mask = (1, 1, 1, 1);
+  half4 mask = half4(1, 1, 1, 1);
   #endif
   #if DETAIL_ON && DETAIL_MASK_ON
   mask = tex2D(_DetailMask, i.uv_main);
@@ -209,7 +209,7 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
   half4 returnColor = tex2D(_MainTex, i.uv_main);
 
   #if DETAIL_ON
-  half4 mask = (1, 1, 1, 1);
+  half4 mask = half4(1, 1, 1, 1);
   #endif
   #if DETAIL_ON && DETAIL_MASK_ON
   mask = tex2D(_DetailMask, i.uv_main);

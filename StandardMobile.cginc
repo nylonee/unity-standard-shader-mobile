@@ -163,8 +163,10 @@ fixed4 frag(v2f i) : SV_Target
   returnColor += tex2D(_EmissionMap, i.uv_main)*_EmissionStrength*0.2;
   #endif
 
+  #if PHONG_ON || NORMAL_ON
   float3 normal;
   float3 localCoords;
+  #endif
 
   #if PHONG_ON
   // interpolated normal may not be 1
@@ -198,6 +200,7 @@ fixed4 frag(v2f i) : SV_Target
   #if COLOR_ON
   returnColor = bcc(returnColor);
   #endif
+
   return returnColor;
 }
 
@@ -222,8 +225,10 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
   #endif
   returnColor.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lm));
 
+  #if PHONG_ON || NORMAL_ON
   float3 normal;
   float3 localCoords;
+  #endif
 
   #if PHONG_ON
   // interpolated normal may not be 1
@@ -257,5 +262,6 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
   #if COLOR_ON
   returnColor = bcc(returnColor);
   #endif
+
   return returnColor;
 }

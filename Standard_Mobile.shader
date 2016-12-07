@@ -15,9 +15,10 @@
 
 // TODO: Normal mapping not working properly
 // TODO: Change defined point light to a single inputted light?
-// TODO: ZWrite, Culling, Forward rendering?
+// TODO: Forward rendering?
+// TODO: Research efficient ways of toggling shadow casting
 
-Shader "Custom/StandardMobile"
+Shader "Custom/Unlit Mobile (supports lightmaps)"
 {
   Properties
   {
@@ -56,6 +57,7 @@ Shader "Custom/StandardMobile"
     Pass {
       Tags { "LightMode" = "VertexLM" }
       Lighting Off
+      Cull Back
   		CGPROGRAM
       #pragma vertex vert_lm
       #pragma fragment frag_lm
@@ -77,6 +79,7 @@ Shader "Custom/StandardMobile"
     Pass {
       Tags { "LightMode" = "VertexLMRGBM" }
       Lighting Off
+      Cull Back
       CGPROGRAM
       #pragma vertex vert_lm
       #pragma fragment frag_lm
@@ -98,6 +101,7 @@ Shader "Custom/StandardMobile"
     Pass {
       Tags { "LightMode" = "Vertex" }
       Lighting Off
+      Cull Back
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment frag

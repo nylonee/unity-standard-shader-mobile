@@ -5,9 +5,11 @@
 sampler2D _MainTex;
 half4 _MainTex_ST;
 
+#if COLOR_ON
 half4 _Color;
 half _Brightness;
 half _Contrast;
+#endif
 
 // Phong
 #if PHONG_ON
@@ -19,22 +21,31 @@ half _SpecularPower;
 half _DiffusePower;
 #endif
 
+#if DETAIL_ON
+sampler2D _DetailMap;
+half _DetailStrength;
+#endif
+
+#if DETAIL_ON && DETAIL_MASK_ON
+sampler2D _DetailMask;
+#endif
+
 #if EMISSION_ON
 sampler2D _EmissionMap;
 half _EmissionStrength;
 #endif
 
-#if BUMP_ON
-sampler2D _BumpMap;
-half4 _BumpMap_ST;
+#if NORMAL_ON
+sampler2D _NormalMap;
+half4 _NormalMap_ST;
 #endif
 
 struct appdata
 {
   float4 vertex : POSITION;
   half2 texcoord : TEXCOORD0;
-  #if PHONG_ON || BUMP_ON
-  half4 normal : NORMAL;
+  #if PHONG_ON || NORMAL_ON
+  float4 normal : NORMAL;
   #endif
 };
 
@@ -43,8 +54,8 @@ struct appdata_lm
   float4 vertex : POSITION;
   half2 texcoord : TEXCOORD0;
   half2 texcoord_lm : TEXCOORD1;
-  #if PHONG_ON || BUMP_ON
-  half4 normal : NORMAL;
+  #if PHONG_ON || NORMAL_ON
+  float4 normal : NORMAL;
   #endif
 };
 
@@ -54,10 +65,10 @@ struct v2f
   half2 uv_main : TEXCOORD0;
   UNITY_FOG_COORDS(1)
   #if PHONG_ON
-  half4 worldVertex : TEXCOORD2;
+  float4 worldVertex : TEXCOORD2;
   #endif
-  #if PHONG_ON || BUMP_ON
-  half3 worldNormal : TEXCOORD3;
+  #if PHONG_ON || NORMAL_ON
+  float3 worldNormal : TEXCOORD3;
   #endif
 };
 
@@ -68,10 +79,10 @@ struct v2f_lm
   half2 uv_lm : TEXCOORD1;
   UNITY_FOG_COORDS(2)
   #if PHONG_ON
-  half4 worldVertex : TEXCOORD3;
+  float4 worldVertex : TEXCOORD3;
   #endif
-  #if PHONG_ON || BUMP_ON
-  half3 worldNormal : TEXCOORD4;
+  #if PHONG_ON || NORMAL_ON
+  float3 worldNormal : TEXCOORD4;
   #endif
 };
 
@@ -84,8 +95,8 @@ v2f vert(appdata v)
   #if PHONG_ON
   o.worldVertex = mul(unity_ObjectToWorld, v.vertex);
   #endif
-  #if PHONG_ON || BUMP_ON
-  o.worldNormal = normalize(mul(transpose((half3x3)unity_WorldToObject), v.normal.xyz));
+  #if PHONG_ON || NORMAL_ON
+  o.worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
   #endif
 
   o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
@@ -102,8 +113,8 @@ v2f_lm vert_lm(appdata_lm v)
   #if PHONG_ON
   o.worldVertex = mul(unity_ObjectToWorld, v.vertex);
   #endif
-  #if PHONG_ON || BUMP_ON
-  o.worldNormal = normalize(mul(transpose((half3x3)unity_WorldToObject), v.normal.xyz));
+  #if PHONG_ON || NORMAL_ON
+  o.worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
   #endif
 
   o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
@@ -116,6 +127,7 @@ v2f_lm vert_lm(appdata_lm v)
 
 // FRAGMENT SHADERS
 
+#if COLOR_ON
 // Fix the brightness, contrast and color
 half4 bcc(half4 main_color)
 {
@@ -123,20 +135,36 @@ half4 bcc(half4 main_color)
   main_color.rgb = ((main_color.rgb - 0.5f) * max(_Contrast, 0)) + 0.5f;
   main_color.rgb += _Brightness * 0.05;
   main_color.rgb *= main_color.a;
-  main_color.rgb = lerp(main_color.rgb, _Color.rgb, _Color.a);
+
+  //main_color.rgb = lerp(main_color.rgb, _Color.rgb, _Color.a);
+  main_color *= _Color;
 
   return main_color;
 }
+#endif
 
 fixed4 frag(v2f i) : SV_Target
 {
   half4 returnColor = tex2D(_MainTex, i.uv_main);
-  #if EMISSION_ON
-  returnColor += tex2D(_EmissionMap, i.uv_main)*_EmissionStrength/5;
+
+  #if DETAIL_ON
+  half4 mask = (1, 1, 1, 1);
+  #endif
+  #if DETAIL_ON && DETAIL_MASK_ON
+  mask = tex2D(_DetailMask, i.uv_main);
+  #endif
+  #if DETAIL_ON
+  half4 detailMap = tex2D(_DetailMap, i.uv_main) * mask;
+  const fixed3 constantList = fixed3(1.0, 0.5, 0.0);
+  returnColor = (returnColor + _DetailStrength*detailMap) * constantList.xxxz + (returnColor + _DetailStrength*detailMap) * constantList.zzzy;
   #endif
 
-  half3 normal;
-  half3 localCoords;
+  #if EMISSION_ON
+  returnColor += tex2D(_EmissionMap, i.uv_main)*_EmissionStrength*0.2;
+  #endif
+
+  float3 normal;
+  float3 localCoords;
 
   #if PHONG_ON
   // interpolated normal may not be 1
@@ -144,8 +172,8 @@ fixed4 frag(v2f i) : SV_Target
   localCoords = i.worldVertex.xyz;
   #endif
 
-  #if BUMP_ON
-  normal = normalize(cross(i.worldNormal, tex2D(_BumpMap, _BumpMap_ST.xy * i.uv_main.xy + _BumpMap_ST.zw)));
+  #if NORMAL_ON
+  normal = normalize(cross(i.worldNormal, tex2D(_NormalMap, _NormalMap_ST.xy * i.uv_main.xy + _NormalMap_ST.zw)));
   localCoords = float3(2.0 * normal.z - 1.0, 2.0 * normal.y - 1.0, 0.0);
   localCoords.z = 1.0 - 0.5 * dot(localCoords, localCoords);
   #endif
@@ -167,19 +195,35 @@ fixed4 frag(v2f i) : SV_Target
 
   UNITY_APPLY_FOG(i.fogCoord, returnColor);
 
-  return bcc(returnColor);
+  #if COLOR_ON
+  returnColor = bcc(returnColor);
+  #endif
+  return returnColor;
 }
 
 fixed4 frag_lm(v2f_lm i) : SV_Target
 {
   half4 returnColor = tex2D(_MainTex, i.uv_main);
+
+  #if DETAIL_ON
+  half4 mask = (1, 1, 1, 1);
+  #endif
+  #if DETAIL_ON && DETAIL_MASK_ON
+  mask = tex2D(_DetailMask, i.uv_main);
+  #endif
+  #if DETAIL_ON
+  half4 detailMap = tex2D(_DetailMap, i.uv_main) * mask;
+  const fixed3 constantList = fixed3(1.0, 0.5, 0.0);
+  returnColor = (returnColor + _DetailStrength*detailMap) * constantList.xxxz + (returnColor + _DetailStrength*detailMap) * constantList.zzzy;
+  #endif
+
   #if EMISSION_ON
   returnColor += tex2D(_EmissionMap, i.uv_main)*_EmissionStrength/5;
   #endif
   returnColor.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lm));
 
-  half3 normal;
-  half3 localCoords;
+  float3 normal;
+  float3 localCoords;
 
   #if PHONG_ON
   // interpolated normal may not be 1
@@ -187,8 +231,8 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
   localCoords = i.worldVertex.xyz;
   #endif
 
-  #if BUMP_ON
-  normal = normalize(cross(i.worldNormal, tex2D(_BumpMap, _BumpMap_ST.xy * i.uv_main.xy + _BumpMap_ST.zw)));
+  #if NORMAL_ON
+  normal = normalize(cross(i.worldNormal, tex2D(_NormalMap, _NormalMap_ST.xy * i.uv_main.xy + _NormalMap_ST.zw)));
   localCoords = float3(2.0 * normal.z - 1.0, 2.0 * normal.y - 1.0, 0.0);
   localCoords.z = 1.0 - 0.5 * dot(localCoords, localCoords);
   #endif
@@ -210,5 +254,8 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
 
   UNITY_APPLY_FOG(i.fogCoord, returnColor);
 
-  return bcc(returnColor);
+  #if COLOR_ON
+  returnColor = bcc(returnColor);
+  #endif
+  return returnColor;
 }

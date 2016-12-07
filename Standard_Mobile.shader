@@ -1,31 +1,33 @@
 // Standard shader for mobile
 // Written by Nihal Mirpuri @nylonee
 
-// Notes
-// The toggles are used to turn on and off shader features
+// Notes:
+
+// The property toggles are used to turn on and off shader features
 // You can't toggle shader features at run-time. Only during the build
-// This keeps the shader code extremely optimized, it only compiles what is needed
+
 // Doesn't support shadow casting
+
 // Only supports exponential2 fog (the cheapest)
+
 // Detail mask will only kick in if detail map is toggled on
 
 // Point light accepts a single point light, which you can modify via script if needed
 // For example, a sun moving across the sky
-// No other lighting (except lightmaps) are accepted, to keep the code blazing fast
+// No other lighting (except lightmaps) are accepted
 
 // TODO: Normal mapping not working properly
 // TODO: Change defined point light to a single inputted light?
-// TODO: Forward rendering?
-// TODO: Research efficient ways of toggling shadow casting
+// TODO: Research "PassFlags" = "OnlyDirectional" potential
 
-Shader "Custom/Unlit Mobile (supports lightmaps)"
+Shader "Mobile/Standard"
 {
   Properties
   {
     _MainTex("Albedo", 2D) = "white" {}
 
     [Toggle(COLOR_ON)] _ColorToggle("Color, Brightness, Contrast Toggle", Int) = 0
-    _Color("Color", Color) = (1,1,1,0)
+    _Color("Color", Color) = (1,1,1)
     _Brightness ("Brightness", Range(-10.0, 10.0)) = 0.0
     _Contrast ("Contrast", Range(0.0, 3.0)) = 1
 

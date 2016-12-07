@@ -4,13 +4,14 @@
 // Notes
 // Doesn't support shadow casting
 // Only supports exponential2 fog (the cheapest)
-// TODO: _Color.a doesn't work
 // TODO: Detail map and detail mask
-// TODO: Transparency vs Opaque?
-// TODO: Forward rendering options?
 // TODO: Specular map
-// TODO: Change defined point light to a single inputted light
+// TODO: Convert all relevant float into half and fixed values
+// TODO: Change defined point light to a single inputted light?
+// TODO: Treat all other light sources as Vertex lights?
 // TODO: Bump mapping seems a bit weird?
+// TODO: Transparency vs Opaque? Dropdown menu?
+// TODO: Optimisation
 
 Shader "Custom/StandardMobile"
 {
@@ -45,11 +46,12 @@ Shader "Custom/StandardMobile"
       Tags { "LightMode" = "VertexLM" }
       Lighting Off
   		CGPROGRAM
-      #pragma vertex vert
-      #pragma fragment frag
+      #pragma vertex vert_lm
+      #pragma fragment frag_lm
 
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP
+
       #pragma shader_feature PHONG_ON
       #pragma shader_feature EMISSION_ON
       #pragma shader_feature BUMP_ON
@@ -62,11 +64,12 @@ Shader "Custom/StandardMobile"
       Tags { "LightMode" = "VertexLMRGBM" }
       Lighting Off
       CGPROGRAM
-      #pragma vertex vert
-      #pragma fragment frag
+      #pragma vertex vert_lm
+      #pragma fragment frag_lm
 
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP
+
       #pragma shader_feature PHONG_ON
       #pragma shader_feature EMISSION_ON
       #pragma shader_feature BUMP_ON
@@ -84,6 +87,7 @@ Shader "Custom/StandardMobile"
 
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP
+
       #pragma shader_feature PHONG_ON
       #pragma shader_feature EMISSION_ON
       #pragma shader_feature BUMP_ON

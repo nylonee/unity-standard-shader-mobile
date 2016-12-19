@@ -191,6 +191,8 @@ fixed4 frag(v2f i) : SV_Target
   half3 V = normalize(_WorldSpaceCameraPos - localCoords);
   half3 H = normalize(V+L);
   half3 spe = _PointLightColor.rgb * pow(saturate(dot(normal, H)), 25) * _SpecularPower;
+  
+  returnColor.rgb = lerp(returnColor.rgb, amb.rgb+dif.rgb+spe.rgb, _PointLightColor.a);
   #endif
 
   UNITY_APPLY_FOG(i.fogCoord, returnColor);

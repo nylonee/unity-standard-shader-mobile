@@ -1,8 +1,6 @@
 // Standard shader for mobile
 // Written by Nihal Mirpuri @nylonee
 
-// TODO: Adjust strength of normal map?
-
 Shader "Mobile/Standard"
 {
   Properties

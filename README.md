@@ -15,6 +15,8 @@ This shader is kept fast by disabling shader features that are not being used du
  * Add an emission map, adjust strength
  * Add a normal map
 
+ ![Shader options](shaderoptions.png "Shader options")  
+
 ## Important Notes
  * Doesn't support shadow casting
  * No other lighting (except lightmaps) are passed in. If you need more lighting options, consider using a different shader.

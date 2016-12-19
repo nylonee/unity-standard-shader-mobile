@@ -6,6 +6,8 @@
 // The property toggles are used to turn on and off shader features
 // You can't toggle shader features at run-time. Only during the build
 
+// Supports lightmapping
+
 // Doesn't support shadow casting
 
 // Only supports exponential2 fog (the cheapest)
@@ -17,7 +19,9 @@
 // No other lighting (except lightmaps) are passed in.
 // If you need more lighting options, consider using Standard shader instead
 
-// TODO: Normal mapping not working properly
+// Normal mapping requires phong light to be on, since there are no other
+// dynamic light sources being passed in to create the effect
+
 // TODO: Phong light should be additive onto lightmapped light
 // TODO: Add comments and documentation
 
@@ -65,8 +69,6 @@ Shader "Mobile/Standard"
       #pragma vertex vert_lm
       #pragma fragment frag_lm
 
-      #pragma debug
-
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP
 
@@ -89,8 +91,6 @@ Shader "Mobile/Standard"
       #pragma vertex vert_lm
       #pragma fragment frag_lm
 
-      #pragma debug
-
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP
 
@@ -112,8 +112,6 @@ Shader "Mobile/Standard"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment frag
-
-      #pragma debug
 
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP

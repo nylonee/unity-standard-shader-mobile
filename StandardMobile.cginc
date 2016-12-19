@@ -167,21 +167,17 @@ fixed4 frag(v2f i) : SV_Target
   #endif
 
   #if PHONG_ON || NORMAL_ON
-  float3 normal;
   float3 localCoords;
   #endif
 
   #if PHONG_ON
   // interpolated normal may not be 1
-  normal = normalize(i.worldNormal);
+  float3 normal = normalize(i.worldNormal);
   localCoords = i.worldVertex.xyz;
   #endif
 
   #if NORMAL_ON
   localCoords = UnpackNormal(tex2D(_NormalMap, i.uv_main));
-  /*normal = normalize(cross(i.worldNormal, tex2D(_NormalMap, _NormalMap_ST.xy * i.uv_main.xy + _NormalMap_ST.zw)));
-  localCoords = float3(2.0 * normal.z - 1.0, 2.0 * normal.y - 1.0, 0.0);
-  localCoords.z = 1.0 - 0.5 * dot(localCoords, localCoords);*/
   #endif
 
   #if PHONG_ON
@@ -195,8 +191,6 @@ fixed4 frag(v2f i) : SV_Target
   half3 V = normalize(_WorldSpaceCameraPos - localCoords);
   half3 H = normalize(V+L);
   half3 spe = _PointLightColor.rgb * pow(saturate(dot(normal, H)), 25) * _SpecularPower;
-
-  returnColor.rgb = lerp(returnColor.rgb, amb.rgb+dif.rgb+spe.rgb, _PointLightColor.a);
   #endif
 
   UNITY_APPLY_FOG(i.fogCoord, returnColor);
@@ -230,21 +224,17 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
   returnColor.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lm));
 
   #if PHONG_ON || NORMAL_ON
-  float3 normal;
   float3 localCoords;
   #endif
 
   #if PHONG_ON
   // interpolated normal may not be 1
-  normal = normalize(i.worldNormal);
+  float3 normal = normalize(i.worldNormal);
   localCoords = i.worldVertex.xyz;
   #endif
 
   #if NORMAL_ON
   localCoords = UnpackNormal(tex2D(_NormalMap, i.uv_main));
-  /*normal = normalize(cross(i.worldNormal, tex2D(_NormalMap, _NormalMap_ST.xy * i.uv_main.xy + _NormalMap_ST.zw)));
-  localCoords = float3(2.0 * normal.z - 1.0, 2.0 * normal.y - 1.0, 0.0);
-  localCoords.z = 1.0 - 0.5 * dot(localCoords, localCoords);*/
   #endif
 
   #if PHONG_ON

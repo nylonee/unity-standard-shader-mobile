@@ -22,7 +22,6 @@
 // Normal mapping requires phong light to be on, since there are no other
 // dynamic light sources being passed in to create the effect
 
-// TODO: Phong light should be additive onto lightmapped light
 // TODO: Add comments and documentation
 
 Shader "Mobile/Standard"

@@ -1,5 +1,5 @@
 # Standard Shader (Mobile)
-A shader written in Unity's ShaderLab and CG, designed for mobile devices
+A shader written in Unity's ShaderLab and CG, designed for mobile devices. See [usage](USAGE.md)
 
 ![Example lighting](lightingexample_rz.png "Example lighting")  
 *No external lighting has been passed in to create the lighting effect on this block*
@@ -13,7 +13,7 @@ This shader is kept fast by disabling shader features that are not being used du
  * Adjust point light's Blinn-Phong intensity (ambience, specular and diffuse)
  * Add a detail map, adjust strength and add a detail mask
  * Add an emission map, adjust strength
- * Add a normal map
+ * Add a normal map  
 
  ![Shader options](shaderoptions.png "Shader options")  
 

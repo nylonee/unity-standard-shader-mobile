@@ -84,6 +84,12 @@ struct v2f_lm
   #if PHONG_ON || NORMAL_ON
   float3 worldNormal : TEXCOORD4;
   #endif
+  /*#if NORMAL_ON
+  float3 worldPos : TEXCOORD5;
+  half3 tspace0 : TEXCOORD6; // tangent.x, bitangent.x, normal.x
+  half3 tspace1 : TEXCOORD7; // tangent.y, bitangent.y, normal.y
+  half3 tspace2 : TEXCOORD8; // tangent.z, bitangent.z, normal.z
+  #endif*/
 };
 
 // VERTEX SHADERS
@@ -114,10 +120,25 @@ v2f_lm vert_lm(appdata_lm v)
   o.worldVertex = mul(unity_ObjectToWorld, v.vertex);
   #endif
   #if PHONG_ON || NORMAL_ON
-  o.worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
+  //o.worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
+  o.worldNormal = UnityObjectToWorldNormal(v.normal);
   #endif
 
   o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+
+  /*#if NORMAL_ON
+  o.worldPos = mul(_Object2World, vertex).xyz;
+  half3 wNormal = UnityObjectToWorldNormal(normal);
+  half3 wtangent = UnityObjectToWorldDir(tangent.xyz);
+  // compute bitangent from cross product of normal and tangent
+  half tangentSign = tangent.w * unity_WorldTransformParams.w;
+  half3 wBitangent = cross(wNormal, wTangent) * tangentSign;
+  // output the tangent space matrix
+  o.tspace0 = half3(wTangent.x, wBitangent.x, wNormal.x);
+  o.tspace1 = half3(wTangent.y, wBitangent.y, wNormal.y);
+  o.tspace2 = half3(wTangent.z, wBitangent.z, wNormal.z);
+  #endif*/
+
   o.uv_main = TRANSFORM_TEX(v.texcoord, _MainTex);
   o.uv_lm = v.texcoord_lm.xy * unity_LightmapST.xy + unity_LightmapST.zw;
   UNITY_TRANSFER_FOG(o, o.vertex);

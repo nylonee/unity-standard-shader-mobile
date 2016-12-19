@@ -14,11 +14,12 @@
 
 // Point light accepts a single point light, which you can modify via script if needed
 // For example, a sun moving across the sky.
-// No other lighting (except lightmaps) are passed in
+// No other lighting (except lightmaps) are passed in.
+// If you need more lighting options, consider using Standard shader instead
 
 // TODO: Normal mapping not working properly
-// TODO: Consider using the tiling and offset from the base texture for normal map?
-// TODO: Research "PassFlags" = "OnlyDirectional" potential
+// TODO: Phong light should be additive onto lightmapped light
+// TODO: Add comments and documentation
 
 Shader "Mobile/Standard"
 {
@@ -49,7 +50,7 @@ Shader "Mobile/Standard"
     _EmissionStrength("Emission Strength", Range(0.0,10.0)) = 1
 
     [Toggle(NORMAL_ON)] _Normal("Normal Map Toggle", Int) = 0
-    _NormalMap("Normal Map", 2D) = "white" {}
+    _NormalMap("Normal Map", 2D) = "bump" {}
   }
 
   SubShader {
@@ -63,6 +64,8 @@ Shader "Mobile/Standard"
   		CGPROGRAM
       #pragma vertex vert_lm
       #pragma fragment frag_lm
+
+      #pragma debug
 
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP
@@ -86,6 +89,8 @@ Shader "Mobile/Standard"
       #pragma vertex vert_lm
       #pragma fragment frag_lm
 
+      #pragma debug
+
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP
 
@@ -107,6 +112,8 @@ Shader "Mobile/Standard"
       CGPROGRAM
       #pragma vertex vert
       #pragma fragment frag
+
+      #pragma debug
 
       #pragma multi_compile_fog
       #pragma skip_variants FOG_LINEAR FOG_EXP

@@ -1,7 +1,7 @@
 # Standard Shader (Mobile)
 A shader written in Unity's ShaderLab and CG, designed for mobile devices. See [usage](USAGE.md)
 
-![Example lighting](lightingexample_rz.png "Example lighting")  
+![Example lighting](lightingexample.png "Example lighting")  
 *No external lighting has been passed in to create the lighting effect on this block*
 
 This shader is kept fast by disabling shader features that are not being used during compilation
@@ -20,4 +20,3 @@ This shader is kept fast by disabling shader features that are not being used du
 ## Important Notes
  * Doesn't support shadow casting
  * No other lighting (except lightmaps) are passed in. If you need more lighting options, consider using a different shader.
- * Normal mapping requires phong light to be on

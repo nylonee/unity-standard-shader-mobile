@@ -4,7 +4,6 @@
 // The property toggles are used to turn on and off shader features
 // You can't toggle shader features at run-time. Only during the build
 
-// TODO: Add comments and documentation
 // TODO: Adjust strength of normal map?
 
 Shader "Mobile/Standard"

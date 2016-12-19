@@ -1,9 +1,6 @@
 // Standard shader for mobile
 // Written by Nihal Mirpuri @nylonee
 
-// The property toggles are used to turn on and off shader features
-// You can't toggle shader features at run-time. Only during the build
-
 // TODO: Adjust strength of normal map?
 
 Shader "Mobile/Standard"

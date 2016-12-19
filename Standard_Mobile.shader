@@ -1,26 +1,8 @@
 // Standard shader for mobile
 // Written by Nihal Mirpuri @nylonee
 
-// Notes:
-
 // The property toggles are used to turn on and off shader features
 // You can't toggle shader features at run-time. Only during the build
-
-// Supports lightmapping
-
-// Doesn't support shadow casting
-
-// Only supports exponential2 fog (the cheapest)
-
-// Detail mask will only kick in if detail map is toggled on
-
-// Point light accepts a single point light, which you can modify via script if needed
-// For example, a sun moving across the sky.
-// No other lighting (except lightmaps) are passed in.
-// If you need more lighting options, consider using Standard shader instead
-
-// Normal mapping requires phong light to be on, since there are no other
-// dynamic light sources being passed in to create the effect
 
 // TODO: Add comments and documentation
 // TODO: Adjust strength of normal map?

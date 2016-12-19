@@ -1,7 +1,7 @@
 # Standard Shader (Mobile)
 A shader written in Unity's ShaderLab and CG, designed for mobile devices
 
-![alt text](https://github.com/nylonee/unity-standard-shader-mobile/tree/master/lightingexample.png "Example lighting")  
+![Example lighting](lightingexample_rz.png "Example lighting")  
 *No external lighting has been passed in to create the lighting effect on this block*
 
 This shader is kept fast by disabling shader features that are not being used during compilation

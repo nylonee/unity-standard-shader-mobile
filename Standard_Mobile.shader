@@ -23,6 +23,7 @@
 // dynamic light sources being passed in to create the effect
 
 // TODO: Add comments and documentation
+// TODO: Adjust strength of normal map?
 
 Shader "Mobile/Standard"
 {

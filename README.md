@@ -1,11 +1,11 @@
 # Standard Shader (Mobile)
 A shader written in Unity's ShaderLab and CG, designed for mobile devices. See [usage](USAGE.md)
 
-![Example lighting](http://i.imgur.com/b1vUppR.png "Example lighting")  
+![Example lighting](http://i.imgur.com/cVsXQHl.png "Example lighting")  
 
-*No external lighting has been passed in to create the lighting effect on this block*
+*No external lighting has been passed in to create the lighting effect on this block, keeping the render time fast, while producing realistic results*
 
-This shader is kept fast by disabling shader features that are not being used during compilation
+This shader is kept fast by disabling shader features that are not being used during compilation. I've designed this shader with game artists in mind, those who want to be able to tweak the values to perfection per material, rather than a shader that pretends that it knows exactly how you want your lighting and texture strengths.
 ## Features
  * Supports lightmaps and exponential2 fog
  * Can adjust color tint, brightness and contrast
@@ -14,7 +14,7 @@ This shader is kept fast by disabling shader features that are not being used du
  * Adjust point light's Blinn-Phong intensity (ambience, specular and diffuse)
  * Add a detail map, adjust strength and add a detail mask
  * Add an emission map, adjust strength
- * Add a normal map  
+ * Add a normal map, adjust strength
 
  ![Shader options](http://i.imgur.com/khtlPSX.png "Shader options")  
 

@@ -79,3 +79,4 @@ Add an emission map (see Unity's [Emission](https://docs.unity3d.com/Manual/Stan
 
 ### Normal Map Toggle
 Add a normal map, to give better detail. Because normal maps require a lighting model, the Point Light must be toggled in order to see the normal mapping effect, since this is the only 'dynamic' light source that's accepted into the shader. See Unity's [Normal](https://docs.unity3d.com/Manual/StandardShaderMaterialParameterNormalMap.html) parameter for more details on normal maps.
+A feature of this normal map which you don't usually see in other shaders, is the ability to tweak how affected the material is, using the strength slider.

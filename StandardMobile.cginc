@@ -38,6 +38,7 @@ half _EmissionStrength;
 #if NORMAL_ON
 sampler2D _NormalMap;
 half4 _NormalMap_ST;
+half _NormalStrength;
 #endif
 
 struct appdata
@@ -177,7 +178,7 @@ fixed4 frag(v2f i) : SV_Target
   #endif
 
   #if NORMAL_ON
-  localCoords = UnpackNormal(tex2D(_NormalMap, i.uv_main));
+  localCoords = _NormalStrength * UnpackNormal(tex2D(_NormalMap, i.uv_main));
   #endif
 
   #if PHONG_ON
@@ -191,7 +192,7 @@ fixed4 frag(v2f i) : SV_Target
   half3 V = normalize(_WorldSpaceCameraPos - localCoords);
   half3 H = normalize(V+L);
   half3 spe = _PointLightColor.rgb * pow(saturate(dot(normal, H)), 25) * _SpecularPower;
-  
+
   returnColor.rgb = lerp(returnColor.rgb, amb.rgb+dif.rgb+spe.rgb, _PointLightColor.a);
   #endif
 
@@ -236,7 +237,7 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
   #endif
 
   #if NORMAL_ON
-  localCoords = UnpackNormal(tex2D(_NormalMap, i.uv_main));
+  normal = _NormalStrength * UnpackNormal(tex2D(_NormalMap, i.uv_main));
   #endif
 
   #if PHONG_ON

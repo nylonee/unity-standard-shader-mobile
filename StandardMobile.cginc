@@ -5,13 +5,14 @@
 sampler2D _MainTex;
 half4 _MainTex_ST;
 
+// Color, brightness and contrast
 #if COLOR_ON
 half4 _Color;
 half _Brightness;
 half _Contrast;
 #endif
 
-// Phong
+// Phong point light
 #if PHONG_ON
 uniform half4 _PointLightColor;
 uniform half3 _PointLightPosition;
@@ -21,20 +22,24 @@ half _SpecularPower;
 half _DiffusePower;
 #endif
 
+// Detail map
 #if DETAIL_ON
 sampler2D _DetailMap;
 half _DetailStrength;
 #endif
 
+// Detail mask
 #if DETAIL_ON && DETAIL_MASK_ON
 sampler2D _DetailMask;
 #endif
 
+// Emission map
 #if EMISSION_ON
 sampler2D _EmissionMap;
 half _EmissionStrength;
 #endif
 
+// Normal map
 #if NORMAL_ON
 sampler2D _NormalMap;
 half4 _NormalMap_ST;
@@ -45,7 +50,7 @@ struct appdata
 {
   float4 vertex : POSITION;
   half2 texcoord : TEXCOORD0;
-  #if PHONG_ON || NORMAL_ON
+  #if PHONG_ON
   float4 normal : NORMAL;
   #endif
 };
@@ -55,7 +60,7 @@ struct appdata_lm
   float4 vertex : POSITION;
   half2 texcoord : TEXCOORD0;
   half2 texcoord_lm : TEXCOORD1;
-  #if PHONG_ON || NORMAL_ON
+  #if PHONG_ON
   float4 normal : NORMAL;
   #endif
 };
@@ -67,8 +72,6 @@ struct v2f
   UNITY_FOG_COORDS(1)
   #if PHONG_ON
   float4 worldVertex : TEXCOORD2;
-  #endif
-  #if PHONG_ON || NORMAL_ON
   float3 worldNormal : TEXCOORD3;
   #endif
 };
@@ -81,8 +84,6 @@ struct v2f_lm
   UNITY_FOG_COORDS(2)
   #if PHONG_ON
   float4 worldVertex : TEXCOORD3;
-  #endif
-  #if PHONG_ON || NORMAL_ON
   float3 worldNormal : TEXCOORD4;
   #endif
 };
@@ -95,9 +96,6 @@ v2f vert(appdata v)
 
   #if PHONG_ON
   o.worldVertex = mul(unity_ObjectToWorld, v.vertex);
-  #endif
-  #if PHONG_ON || NORMAL_ON
-  //o.worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
   o.worldNormal = UnityObjectToWorldNormal(v.normal);
   #endif
 
@@ -114,15 +112,12 @@ v2f_lm vert_lm(appdata_lm v)
 
   #if PHONG_ON
   o.worldVertex = mul(unity_ObjectToWorld, v.vertex);
-  #endif
-  #if PHONG_ON || NORMAL_ON
-  //o.worldNormal = normalize(mul(transpose((float3x3)unity_WorldToObject), v.normal.xyz));
   o.worldNormal = UnityObjectToWorldNormal(v.normal);
   #endif
 
   o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-
   o.uv_main = TRANSFORM_TEX(v.texcoord, _MainTex);
+  // lightmapped uv
   o.uv_lm = v.texcoord_lm.xy * unity_LightmapST.xy + unity_LightmapST.zw;
   UNITY_TRANSFER_FOG(o, o.vertex);
 
@@ -178,6 +173,7 @@ fixed4 frag(v2f i) : SV_Target
   #endif
 
   #if NORMAL_ON
+  // update localCoords to new normal vertex
   localCoords = _NormalStrength * UnpackNormal(tex2D(_NormalMap, i.uv_main));
   #endif
 
@@ -237,6 +233,7 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
   #endif
 
   #if NORMAL_ON
+  // update localCoords to new normal vertex
   normal = _NormalStrength * UnpackNormal(tex2D(_NormalMap, i.uv_main));
   #endif
 

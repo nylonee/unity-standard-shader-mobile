@@ -38,6 +38,7 @@ Shader "Mobile/Standard"
   	Tags { "RenderType" = "Opaque" }
   	LOD 150
 
+    // Render the relevant pass based on whether lightmap data is being passed in
     Pass {
       Tags { "LightMode" = "VertexLM" }
       Lighting Off

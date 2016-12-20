@@ -1,7 +1,8 @@
 # Standard Shader (Mobile)
 A shader written in Unity's ShaderLab and CG, designed for mobile devices. See [usage](USAGE.md)
 
-![Example lighting](lightingexample.png "Example lighting")  
+![Example lighting](http://i.imgur.com/b1vUppR.png "Example lighting")  
+
 *No external lighting has been passed in to create the lighting effect on this block*
 
 This shader is kept fast by disabling shader features that are not being used during compilation
@@ -15,7 +16,7 @@ This shader is kept fast by disabling shader features that are not being used du
  * Add an emission map, adjust strength
  * Add a normal map  
 
- ![Shader options](shaderoptions.png "Shader options")  
+ ![Shader options](http://i.imgur.com/khtlPSX.png "Shader options")  
 
 ## Important Notes
  * Tested on Unity 5.4.0f3

@@ -21,4 +21,5 @@ This shader is kept fast by disabling shader features that are not being used du
 ## Important Notes
  * Tested on Unity 5.4.0f3
  * Doesn't support shadow casting
+ * Something's wrong with Normal mapping. I'm working on it!
  * No other lighting (except lightmaps) are passed in. If you need more lighting options, consider using a different shader.

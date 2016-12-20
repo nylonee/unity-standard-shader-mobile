@@ -1,5 +1,5 @@
 # Quick guide
-To use this shader, copy the StandardMobile.shader and StandardMobile.cginc files to your Asset folder, then in the material you want to use this shader on, select `Mobile/Standard` as your shader.
+To use this shader on a material, copy the StandardMobile.shader and StandardMobile.cginc files to your Asset folder, then select `Mobile/Standard` as your shader in the material properties.
 
 ## Feature toggles
 You can choose which features you want compiled into the final code using the shader properties. The toggles available are:

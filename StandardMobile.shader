@@ -31,7 +31,6 @@ Shader "Mobile/Standard"
 
     [Toggle(NORMAL_ON)] _Normal("Normal Map Toggle", Int) = 0
     _NormalMap("Normal Map", 2D) = "bump" {}
-    _NormalStrength("Normal Strength", Range(0.0, 10.0)) = 1
   }
 
   SubShader {
@@ -104,6 +103,7 @@ Shader "Mobile/Standard"
       #include "StandardMobile.cginc"
       ENDCG
     }
+
   }
 
   FallBack "Mobile/VertexLit"

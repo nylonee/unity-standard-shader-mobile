@@ -42,8 +42,6 @@ half _EmissionStrength;
 // Normal map
 #if NORMAL_ON
 sampler2D _NormalMap;
-half4 _NormalMap_ST;
-half _NormalStrength;
 #endif
 
 struct appdata
@@ -52,6 +50,9 @@ struct appdata
   half2 texcoord : TEXCOORD0;
   #if PHONG_ON
   float4 normal : NORMAL;
+  #endif
+  #if NORMAL_ON
+  float4 tangent : TANGENT;
   #endif
 };
 
@@ -63,6 +64,9 @@ struct appdata_lm
   #if PHONG_ON
   float4 normal : NORMAL;
   #endif
+  #if NORMAL_ON
+  float4 tangent : TANGENT;
+  #endif
 };
 
 struct v2f
@@ -71,8 +75,17 @@ struct v2f
   half2 uv_main : TEXCOORD0;
   UNITY_FOG_COORDS(1)
   #if PHONG_ON
-  float4 worldVertex : TEXCOORD2;
-  float3 worldNormal : TEXCOORD3;
+  float4 worldVertex : TEXCOORD2; // worldPos
+  #endif
+  #if PHONG_ON || NORMAL_ON
+  half3 worldNormal : TEXCOORD3;
+  #endif
+  #if NORMAL_ON
+  // these three vectors will hold a 3x3 rotation matrix
+  // that transforms from tangent to world space
+  half3 tspace0 : TEXCOORD4; // tangent.x, bitangent.x, normal.x
+  half3 tspace1 : TEXCOORD5; // tangent.y, bitangent.y, normal.y
+  half3 tspace2 : TEXCOORD6; // tangent.z, bitangent.z, normal.z
   #endif
 };
 
@@ -84,7 +97,16 @@ struct v2f_lm
   UNITY_FOG_COORDS(2)
   #if PHONG_ON
   float4 worldVertex : TEXCOORD3;
-  float3 worldNormal : TEXCOORD4;
+  #endif
+  #if PHONG_ON || NORMAL_ON
+  half3 worldNormal : TEXCOORD4;
+  #endif
+  #if NORMAL_ON
+  // these three vectors will hold a 3x3 rotation matrix
+  // that transforms from tangent to world space
+  half3 tspace0 : TEXCOORD5; // tangent.x, bitangent.x, normal.x
+  half3 tspace1 : TEXCOORD6; // tangent.y, bitangent.y, normal.y
+  half3 tspace2 : TEXCOORD7; // tangent.z, bitangent.z, normal.z
   #endif
 };
 
@@ -93,13 +115,24 @@ struct v2f_lm
 v2f vert(appdata v)
 {
   v2f o;
+  o.vertex = UnityObjectToClipPos(v.vertex);
 
   #if PHONG_ON
   o.worldVertex = mul(unity_ObjectToWorld, v.vertex);
   o.worldNormal = UnityObjectToWorldNormal(v.normal);
   #endif
 
-  o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+  #if NORMAL_ON
+  half3 wTangent = UnityObjectToWorldDir(v.tangent.xyz);
+  // compute bitangent from cross product of normal and tangent
+  half tangentSign = v.tangent.w * unity_WorldTransformParams.w;
+  half3 wBitangent = cross(o.worldNormal, wTangent) * tangentSign;
+  // output the tangent space matrix
+  o.tspace0 = half3(wTangent.x, wBitangent.x, o.worldNormal.x);
+  o.tspace1 = half3(wTangent.y, wBitangent.y, o.worldNormal.y);
+  o.tspace2 = half3(wTangent.z, wBitangent.z, o.worldNormal.z);
+  #endif
+
   o.uv_main = TRANSFORM_TEX(v.texcoord, _MainTex);
   UNITY_TRANSFER_FOG(o, o.vertex);
 
@@ -109,13 +142,24 @@ v2f vert(appdata v)
 v2f_lm vert_lm(appdata_lm v)
 {
   v2f_lm o;
+  o.vertex = UnityObjectToClipPos(v.vertex); // XXX: Is this efficient?
 
   #if PHONG_ON
   o.worldVertex = mul(unity_ObjectToWorld, v.vertex);
   o.worldNormal = UnityObjectToWorldNormal(v.normal);
   #endif
 
-  o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+  #if NORMAL_ON && PHONG_ON
+  half3 wTangent = UnityObjectToWorldDir(v.tangent.xyz);
+  // compute bitangent from cross product of normal and tangent
+  half tangentSign = v.tangent.w * unity_WorldTransformParams.w;
+  half3 wBitangent = cross(o.worldNormal, wTangent) * tangentSign;
+  // output the tangent space matrix
+  o.tspace0 = half3(wTangent.x, wBitangent.x, o.worldNormal.x);
+  o.tspace1 = half3(wTangent.y, wBitangent.y, o.worldNormal.y);
+  o.tspace2 = half3(wTangent.z, wBitangent.z, o.worldNormal.z);
+  #endif
+
   o.uv_main = TRANSFORM_TEX(v.texcoord, _MainTex);
   // lightmapped uv
   o.uv_lm = v.texcoord_lm.xy * unity_LightmapST.xy + unity_LightmapST.zw;
@@ -162,22 +206,22 @@ fixed4 frag(v2f i) : SV_Target
   returnColor += tex2D(_EmissionMap, i.uv_main)*_EmissionStrength*0.2;
   #endif
 
-  #if PHONG_ON || NORMAL_ON
-  float3 localCoords;
-  #endif
-
-  #if PHONG_ON
-  // interpolated normal may not be 1
-  float3 normal = normalize(i.worldNormal);
-  localCoords = i.worldVertex.xyz;
-  #endif
-
   #if NORMAL_ON
-  // update localCoords to new normal vertex
-  localCoords = _NormalStrength * UnpackNormal(tex2D(_NormalMap, i.uv_main));
+  // sample the normal map, and decode from the Unity encoding
+  half3 tnormal = UnpackNormal(tex2D(_NormalMap, i.uv_main));
+  // transform normal from tangent to world space
+  half3 worldNormal;
+  worldNormal.x = dot(i.tspace0, tnormal);
+  worldNormal.y = dot(i.tspace1, tnormal);
+  worldNormal.z = dot(i.tspace2, tnormal);
+  float3 normal = normalize(worldNormal);
+  #endif
+  #if !NORMAL_ON && PHONG_ON
+  float3 normal = normalize(i.worldNormal.xyz);
   #endif
 
   #if PHONG_ON
+  float3 localCoords = i.worldVertex.xyz;
   // ambient intensities
   half3 amb = returnColor.rgb * unity_AmbientSky * _AmbiencePower;
   // diffuse intensities
@@ -222,22 +266,22 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
   #endif
   returnColor.rgb *= DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv_lm));
 
-  #if PHONG_ON || NORMAL_ON
-  float3 localCoords;
-  #endif
-
-  #if PHONG_ON
-  // interpolated normal may not be 1
-  float3 normal = normalize(i.worldNormal);
-  localCoords = i.worldVertex.xyz;
-  #endif
-
   #if NORMAL_ON
-  // update localCoords to new normal vertex
-  normal = _NormalStrength * UnpackNormal(tex2D(_NormalMap, i.uv_main));
+  // sample the normal map, and decode from the Unity encoding
+  half3 tnormal = UnpackNormal(tex2D(_NormalMap, i.uv_main));
+  // transform normal from tangent to world space
+  half3 worldNormal;
+  worldNormal.x = dot(i.tspace0, tnormal);
+  worldNormal.y = dot(i.tspace1, tnormal);
+  worldNormal.z = dot(i.tspace2, tnormal);
+  float3 normal = normalize(worldNormal);
+  #endif
+  #if !NORMAL_ON && PHONG_ON
+  float3 normal = normalize(i.worldNormal.xyz);
   #endif
 
   #if PHONG_ON
+  float3 localCoords = i.worldVertex.xyz;
   // ambient intensities
   half3 amb = returnColor.rgb * unity_AmbientSky * _AmbiencePower;
   // diffuse intensities
@@ -260,3 +304,5 @@ fixed4 frag_lm(v2f_lm i) : SV_Target
 
   return returnColor;
 }
+
+// SURFACE SHADERS
